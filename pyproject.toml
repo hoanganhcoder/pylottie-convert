@@ -1,0 +1,40 @@
+[build-system]
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pylottie-convert"
+version = "0.1.0"
+license = "MIT"
+license-files = ["LICENSE"]
+description = "High performance Lottie renderer powered by rlottie"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Hoang Anh Nguyen" }]
+dependencies = ["numpy"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Private :: Do Not Upload",
+]
+
+[project.optional-dependencies]
+gif = ["pillow"]
+apng = ["pillow"]
+webp = ["pillow"]
+all = ["pillow"]
+
+[tool.scikit-build]
+build-dir = "build/{wheel_tag}"
+wheel.packages = ["src/pylottie_convert"]
+
+[tool.scikit-build.cmake.define]
+PYBIND11_LTO_CXX_FLAGS = ""
+CMAKE_INTERPROCEDURAL_OPTIMIZATION = "OFF"
+HAS_FLTO_AUTO = "FALSE"
