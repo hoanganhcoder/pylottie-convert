@@ -1,45 +1,31 @@
-name: Wheels
+name: Build & Publish
 
 on:
-  workflow_dispatch:
-
-  pull_request:
-    paths:
-      - "src/**"
-      - "CMakeLists.txt"
-      - "pyproject.toml"
-      - ".github/workflows/wheels.yml"
-
   push:
-    branches: [main]
-    paths:
-      - "src/**"
-      - "CMakeLists.txt"
-      - "pyproject.toml"
-      - ".github/workflows/wheels.yml"
+    branches:
+      - "**"
 
-  release:
-    types: [published]
-
-env:
-  FORCE_COLOR: 3
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
-  build_wheels:
-    name: Wheels on ${{ matrix.os }}
+  build:
+    name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest] #
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v5
         with:
-          submodules: true
+          fetch-depth: 0
 
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==3.3.1
+        run: python -m pip install cibuildwheel
 
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
@@ -51,21 +37,21 @@ jobs:
 
   publish:
     name: Publish to PyPI
-    needs: build_wheels
+    needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
+
+    if: github.ref == 'refs/heads/main'
+
+    environment: PYPI
+
     steps:
       - uses: actions/download-artifact@v6
         with:
+          pattern: wheels-*
+          merge-multiple: true
           path: dist
 
-      - name: Collect wheels
-        run: |
-          mkdir final_dist
-          find dist -name "*.whl" -exec mv {} final_dist/ \;
-
-      - name: Publish to PyPI
+      - name: Publish to PyPI (Trusted Publisher)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          packages-dir: final_dist
+          packages-dir: dist
