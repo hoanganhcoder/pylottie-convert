@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - "**"
+    paths:
+      - "src/**"
+      - "CMakeLists.txt"
+      - "pyproject.toml"
+      - ".github/workflows/wheels.yml"
 
 permissions:
   contents: read
